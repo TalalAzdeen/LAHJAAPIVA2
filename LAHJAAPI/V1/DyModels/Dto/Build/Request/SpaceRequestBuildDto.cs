@@ -8,9 +8,13 @@ namespace V1.DyModels.Dto.Build.Requests
 {
     public class SpaceRequestBuildDto : ITBuildDto
     {
-        
-        public String? Id { get; set; } = $"space_{Guid.NewGuid():N}";
-
+        /// <summary>
+        /// Id property for DTO.
+        /// </summary>
+        public String? Id { get; set; }
+        /// <summary>
+        /// Name property for DTO.
+        /// </summary>
         public String? Name { get; set; }
         /// <summary>
         /// Description property for DTO.
@@ -18,11 +22,6 @@ namespace V1.DyModels.Dto.Build.Requests
         public String? Description { get; set; }
         /// <summary>
         /// Ram property for DTO.
-        /// 
-        /// 
-        /// 
-        /// 
-      
         /// </summary>
         public Nullable<Int32> Ram { get; set; }
         /// <summary>

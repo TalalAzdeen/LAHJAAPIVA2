@@ -11,7 +11,7 @@ namespace V1.DyModels.Dto.Build.Requests
         /// <summary>
         /// Id property for DTO.
         /// </summary>
-     
+        public String? Id { get; set; }
         /// <summary>
         /// ProductId property for DTO.
         /// </summary>
@@ -39,7 +39,7 @@ namespace V1.DyModels.Dto.Build.Requests
         /// CreatedAt property for DTO.
         /// </summary>
         public DateTime CreatedAt { get; set; }
-        //public ICollection<SubscriptionRequestBuildDto>? Subscriptions { get; set; }
-        //public ICollection<PlanFeatureRequestBuildDto>? PlanFeatures { get; set; }
+        public ICollection<SubscriptionRequestBuildDto>? Subscriptions { get; set; }
+        public ICollection<PlanFeatureRequestBuildDto>? PlanFeatures { get; set; }
     }
 }

@@ -15,8 +15,8 @@ namespace V1.DyModels.VMs
         ///
         public String? Url { get; set; }
         ///
-        //public String? Token { get; set; }
-        /////
-        //public Boolean IsDefault { get; set; }
+        public String? Token { get; set; }
+        ///
+        public Boolean IsDefault { get; set; }
     }
 }

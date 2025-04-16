@@ -17,10 +17,8 @@ using System;
 
 namespace V1.Services.Services
 {
-
     public interface IUserServiceService<TServiceRequestDso, TServiceResponseDso>
         where TServiceRequestDso : class where TServiceResponseDso : class
     {
-
     }
 }

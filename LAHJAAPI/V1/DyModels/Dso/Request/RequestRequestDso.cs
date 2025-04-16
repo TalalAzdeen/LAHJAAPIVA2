@@ -6,8 +6,5 @@ namespace V1.DyModels.Dso.Requests
 {
     public class RequestRequestDso : RequestRequestShareDto, ITDso
     {
-       
-
-
     }
 }

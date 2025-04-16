@@ -29,7 +29,7 @@ namespace V1.DyModels.VMs
         ///
         public DateTime CreatedAt { get; set; }
         //
-        //public List<SubscriptionCreateVM>? Subscriptions { get; set; }
+        public List<SubscriptionCreateVM>? Subscriptions { get; set; }
         //
         public List<PlanFeatureCreateVM>? PlanFeatures { get; set; }
     }

@@ -29,18 +29,28 @@ using AutoMapper;
 using LAHJAAPI.Data;
 using System;
 using LAHJAAPI.V1.Validators.Conditions;
+using APILAHJA.Utilities;
 
 namespace ApiCore.Validators.Conditions
 {
     public class TFactoryInjector : TBaseFactoryInjector, ITFactoryInjector
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
+       
+        private readonly IUserClaimsHelper _userClaims;
         // يمكنك حقن اي طبقة
-        public TFactoryInjector(IMapper mapper, IAutoNotifier notifier, DataContext context) : base(mapper, notifier)
+        public TFactoryInjector(IMapper mapper, IAutoNotifier notifier, DataContext context, IUserClaimsHelper userClaims) : base(mapper, notifier)
         {
             _context = context;
+            _mapper = mapper;
+            _context = context;
+            _userClaims = userClaims;
         }
 
         public DataContext Context => _context;
+        public IMapper Mapper => _mapper;
+       
+        public IUserClaimsHelper UserClaims => _userClaims;
     }
 }

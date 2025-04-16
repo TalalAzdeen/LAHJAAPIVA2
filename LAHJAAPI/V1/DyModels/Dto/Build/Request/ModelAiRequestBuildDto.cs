@@ -1,8 +1,5 @@
 using AutoGenerator;
 using AutoGenerator.Helper.Translation;
-using LAHJAAPI.Models;
-using AutoGenerator.Config;
-using System;
 
 namespace V1.DyModels.Dto.Build.Requests
 {
@@ -22,9 +19,9 @@ namespace V1.DyModels.Dto.Build.Requests
         /// </summary>
         public String? AbsolutePath { get; set; }
         public TranslationData? Category { get; set; } = new();
-        public TranslationData? Language { get; set; } = new();
+        public string? Language { get; set; }
         public bool? IsStandard { get; set; }
-        public TranslationData? Gender { get; set; } = new();
+        public string? Gender { get; set; }
         public TranslationData? Dialect { get; set; } = new();
         /// <summary>
         /// Type property for DTO.
@@ -34,6 +31,6 @@ namespace V1.DyModels.Dto.Build.Requests
         /// ModelGatewayId property for DTO.
         /// </summary>
         public String? ModelGatewayId { get; set; }
-      
+
     }
 }

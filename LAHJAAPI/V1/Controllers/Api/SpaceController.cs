@@ -1,17 +1,12 @@
-using AutoMapper;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using V1.Services.Services;
-using Microsoft.AspNetCore.Mvc;
-using V1.DyModels.VMs;
-using System.Linq.Expressions;
-using V1.DyModels.Dso.Requests;
 using AutoGenerator.Helper.Translation;
-using System;
+using AutoGenerator.Utilities;
+using AutoMapper;
 using LAHJAAPI.V1.Validators;
-using Stripe.Forwarding;
 using LAHJAAPI.V1.Validators.Conditions;
-using AutoGenerator.Helper;
+using Microsoft.AspNetCore.Mvc;
+using V1.DyModels.Dso.Requests;
+using V1.DyModels.VMs;
+using V1.Services.Services;
 
 namespace V1.Controllers.Api
 {
@@ -20,15 +15,25 @@ namespace V1.Controllers.Api
     [ApiController]
     public class SpaceController : ControllerBase
     {
-        private readonly IConditionChecker _checker;
         private readonly IUseSpaceService _spaceService;
         private readonly IMapper _mapper;
+        private readonly IConditionChecker _checker;
+        private readonly IUseSubscriptionService _subscriptionService;
+        private readonly IUseServiceService _serviceService;
         private readonly ILogger _logger;
-        public SpaceController(IUseSpaceService spaceService, IMapper mapper, ILoggerFactory logger, IConditionChecker checker)
+        public SpaceController(
+            IUseSpaceService spaceService,
+            IMapper mapper,
+            IConditionChecker checker,
+            IUseSubscriptionService subscriptionService,
+            IUseServiceService serviceService,
+            ILoggerFactory logger)
         {
             _spaceService = spaceService;
             _mapper = mapper;
             _checker = checker;
+            _subscriptionService = subscriptionService;
+            _serviceService = serviceService;
             _logger = logger.CreateLogger(typeof(SpaceController).FullName);
         }
 
@@ -86,12 +91,12 @@ namespace V1.Controllers.Api
             }
         }
 
-       
+        // // Get a Space by Lg.
         [HttpGet("GetSpaceByLanguage", Name = "GetSpaceByLg")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<SpaceInfoVM>> GetSpaceByLg(SpaceFilterVM model)
+        public async Task<ActionResult<SpaceOutputVM>> GetSpaceByLg(SpaceFilterVM model)
         {
             var id = model.Id;
             if (string.IsNullOrWhiteSpace(id))
@@ -102,7 +107,6 @@ namespace V1.Controllers.Api
 
             try
             {
-
                 _logger.LogInformation("Fetching Space with ID: {id}", id);
                 var entity = await _spaceService.GetByIdAsync(id);
                 if (entity == null)
@@ -111,12 +115,9 @@ namespace V1.Controllers.Api
                     return NotFound();
                 }
 
-
-
-                var item = _mapper.Map<SpaceInfoVM>(entity);
+                var item = _mapper.Map<SpaceOutputVM>(entity, opt => opt.Items.Add(HelperTranslation.KEYLG, model.Lg));
                 return Ok(item);
             }
-
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while fetching Space with ID: {id}", id);
@@ -124,102 +125,66 @@ namespace V1.Controllers.Api
             }
         }
 
-
-      
-        [HttpGet("GetSpacesBySubscriptionId", Name = "GetSpacesByBySubscriptionId")]
+        // // Get a Spaces by Lg.
+        [HttpGet("GetSpacesByLanguage", Name = "GetSpacesByLg")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<SpaceOutputVM>>> GetSpacesBySubscriptionId(string?Idsub)
+        public async Task<ActionResult<IEnumerable<SpaceOutputVM>>> GetSpacesByLg(string? lg)
         {
-
-            if (string.IsNullOrWhiteSpace(Idsub))
+            if (string.IsNullOrWhiteSpace(lg))
             {
                 _logger.LogWarning("Invalid Space lg received.");
                 return BadRequest("Invalid Space lg null ");
             }
 
-
             try
             {
-
-                var filters = new List<FilterCondition>
-{
-                new FilterCondition("SubscriptionId",Idsub)
-                
-                 };
-
-                //var options = new ParamOptions
-                //{
-                //    PageNumber = 1,
-                //    PageSize = 10,
-                //    Includes = new List<string> { "Orders" }
-                //};
-
-
-                var spaces = await _spaceService.GetAllByAsync(filters, null);
+                var spaces = await _spaceService.GetAllAsync();
                 if (spaces == null)
                 {
                     _logger.LogWarning("Spaces not found  by  ");
                     return NotFound();
                 }
 
-
-                var items = _mapper.Map<IEnumerable<SpaceOutputVM>>(spaces.Data);
+                var items = _mapper.Map<IEnumerable<SpaceOutputVM>>(spaces, opt => opt.Items.Add(HelperTranslation.KEYLG, lg));
                 return Ok(items);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error while fetching Spaces with SubscriptionId: {Idsub}");
+                _logger.LogError(ex, "Error while fetching Spaces with Lg: {lg}", lg);
                 return StatusCode(500, "Internal Server Error");
             }
         }
 
         // Create a new Space.
+        [ServiceFilter(typeof(SubscriptionCheckFilter))]
         [HttpPost(Name = "CreateSpace")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<SpaceOutputVM>> Create([FromBody] SpaceCreateVM model)
         {
-            if (model == null)
-            {
-                _logger.LogWarning("Space data is null in Create.");
-                return BadRequest("Space data is required.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("Invalid model state in Create: {ModelState}", ModelState);
-                return BadRequest(ModelState);
-            }
-
             try
             {
-
-
-                _logger.LogInformation("Creating new Space with data: {@model}", model);
-                var item = _mapper.Map<SpaceRequestDso>(model);
-
-                var result = await _checker.CheckAndResultAsync(SpaceValidatorStates.IsActive, item);
-                if (result.Success is true)
+                if (_checker.CheckAndResult(SpaceValidatorStates.IsValid, new SpaceFilterVM()) is not { } problemDetails)
                 {
+                    var service = await _serviceService.GetByName("createspace");
 
+                    if (_checker.CheckAndResult(ServiceValidatorStates.IsServiceIdFound, service.Id) is not { } errorMessage)
+                    {
+                        var item = _mapper.Map<SpaceRequestDso>(model);
+                        item.SubscriptionId = (await _subscriptionService.GetUserSubscription()).Id;
 
-                    var createdEntity = await _spaceService.CreateAsync(item);
-                    var createdItem = _mapper.Map<SpaceOutputVM>(createdEntity);
-                    return Ok(createdItem);
+                        _logger.LogInformation("Creating new Space with data: {@model}", model);
+
+                        var result = await _spaceService.CreateAsync(item);
+                        var resultVM = _mapper.Map<SpaceOutputVM>(result);
+                        return CreatedAtAction(nameof(GetById), new { id = result.Id }, resultVM);
+                    }
+                    return NotFound(HandelErrors.Problem("Create space", errorMessage.Result.ToString()));
                 }
-
-                else
-                {
-
-                    _logger.LogInformation(" Not new Request with ", result.Message);
-                    return BadRequest(result.Result);
-                }
-
-
-              
+                return StatusCode(500, problemDetails.Result);
             }
             catch (Exception ex)
             {

@@ -115,37 +115,6 @@ namespace V1.Controllers.Api
         }
 
         // // Get a CategoryModels by Lg.
-        //[HttpGet("GetCategoryModelsByLanguage", Name = "GetCategoryModelsByLg")]
-        //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        //public async Task<ActionResult<IEnumerable<CategoryModelOutputVM>>> GetCategoryModelsByLg(string? lg)
-        //{
-        //    if (string.IsNullOrWhiteSpace(lg))
-        //    {
-        //        _logger.LogWarning("Invalid CategoryModel lg received.");
-        //        return BadRequest("Invalid CategoryModel lg null ");
-        //    }
-
-        //    try
-        //    {
-        //        var categorymodels = await _categorymodelService.GetAllAsync();
-        //        if (categorymodels == null)
-        //        {
-        //            _logger.LogWarning("CategoryModels not found  by  ");
-        //            return NotFound();
-        //        }
-
-        //        var items = _mapper.Map<IEnumerable<CategoryModelOutputVM>>(categorymodels, opt => opt.Items.Add(HelperTranslation.KEYLG, lg));
-        //        return Ok(items);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error while fetching CategoryModels with Lg: {lg}", lg);
-        //        return StatusCode(500, "Internal Server Error");
-        //    }
-        //}
-        // // Get a CategoryModels by Lg.
         [HttpGet("GetCategoryModelsByLanguage", Name = "GetCategoryModelsByLg")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -160,13 +129,14 @@ namespace V1.Controllers.Api
 
             try
             {
-                var categorymodels = (await _categorymodelService.GetAllAsync()).ToList();
+                var categorymodels = await _categorymodelService.GetAllAsync();
                 if (categorymodels == null)
                 {
                     _logger.LogWarning("CategoryModels not found  by  ");
                     return NotFound();
                 }
-                var items = _mapper.Map<List<CategoryModelOutputVM>>(categorymodels, opt => opt.Items.Add(HelperTranslation.KEYLG, lg));
+
+                var items = _mapper.Map<IEnumerable<CategoryModelOutputVM>>(categorymodels, opt => opt.Items.Add(HelperTranslation.KEYLG, lg));
                 return Ok(items);
             }
             catch (Exception ex)
@@ -175,6 +145,7 @@ namespace V1.Controllers.Api
                 return StatusCode(500, "Internal Server Error");
             }
         }
+
         // Create a new CategoryModel.
         [HttpPost(Name = "CreateCategoryModel")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

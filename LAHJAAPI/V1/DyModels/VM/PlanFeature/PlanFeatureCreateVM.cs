@@ -11,14 +11,11 @@ namespace V1.DyModels.VMs
     public class PlanFeatureCreateVM : ITVM
     {
         //
-
-
-
         public TranslationData? Name { get; set; }
         //
         public TranslationData? Description { get; set; }
         ///
-        //public String? PlanId { get; set; }
-        //public PlanCreateVM? Plan { get; set; }
+        public String? PlanId { get; set; }
+        public PlanCreateVM? Plan { get; set; }
     }
 }

@@ -1,34 +1,20 @@
 using AutoGenerator;
-using AutoMapper;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using AutoGenerator.Helper;
 using AutoGenerator.Services.Base;
+using AutoMapper;
 using V1.DyModels.Dso.Requests;
 using V1.DyModels.Dso.Responses;
-using LAHJAAPI.Models;
 using V1.DyModels.Dto.Share.Requests;
-using V1.DyModels.Dto.Share.Responses;
 using V1.Repositories.Share;
-using System.Linq.Expressions;
-using V1.Repositories.Builder;
-using AutoGenerator.Repositories.Base;
-using AutoGenerator.Helper;
-using System;
-using LAHJAAPI.V1.Validators.Conditions;
-using LAHJAAPI.V1.Validators;
-using LAHJAAPI.V1.Helper;
-using Microsoft.AspNetCore.Mvc;
 
 namespace V1.Services.Services
 {
     public class RequestService : BaseService<RequestRequestDso, RequestResponseDso>, IUseRequestService
     {
         private readonly IRequestShareRepository _share;
-        private readonly IConditionChecker _checker;
-        public RequestService(IRequestShareRepository buildRequestShareRepository, IMapper mapper, ILoggerFactory logger, IConditionChecker checker) : base(mapper, logger)
+        public RequestService(IRequestShareRepository buildRequestShareRepository, IMapper mapper, ILoggerFactory logger) : base(mapper, logger)
         {
             _share = buildRequestShareRepository;
-            _checker = checker;
         }
 
         public override Task<int> CountAsync()
@@ -45,46 +31,34 @@ namespace V1.Services.Services
             }
         }
 
+        public Task<bool> ExecuteTransactionAsync(Func<Task<bool>> action)
+        {
+            try
+            {
+                _logger.LogInformation("Executing transaction...");
+                return _share.ExecuteTransactionAsync(action);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ExecuteTransactionAsync for Request entities.");
+                throw;
+            }
+        }
         public override async Task<RequestResponseDso> CreateAsync(RequestRequestDso entity)
         {
-           
-
-
+            try
+            {
                 _logger.LogInformation("Creating new Request entity...");
-
-
-                 
-                var isConditionresult = await _checker.CheckAndResultAsync(RequestValidatorStates.IsFullAndError, entity);
-                 
-                if (isConditionresult.Success is true)
-                {
-                    
-                    var result = await _share.CreateAsync((RequestRequestDso)isConditionresult.Result );
-                    var output = GetMapper().Map<RequestResponseDso>(result);
-                    _logger.LogInformation("Created Request entity successfully.");
-                    return output;
-                }
-
-                else
-                {
-                      
-                        _logger.LogWarning("Space entity creation failed due to validation: {Error}", isConditionresult.Message);
-                        throw new ApiControllerException
-                      (
-
-                      isConditionresult.Result as ProblemDetails
-                           , "error"
-
-                      );
-
-
+                var result = await _share.CreateAsync(entity);
+                var output = GetMapper().Map<RequestResponseDso>(result);
+                _logger.LogInformation("Created Request entity successfully.");
+                return output;
             }
-            // }
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, "Error while creating Request entity.");
-            //    return null;
-            //}
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while creating Request entity.");
+                return null;
+            }
         }
 
         public override Task DeleteAsync(string id)

@@ -22,16 +22,13 @@ namespace V1.Services.Services
         private readonly IModelAiShareRepository _share;
         public ModelAiService(IModelAiShareRepository buildModelAiShareRepository, IMapper mapper, ILoggerFactory logger) : base(mapper, logger)
         {
-
             _share = buildModelAiShareRepository;
         }
-
 
         public override Task<int> CountAsync()
         {
             try
             {
-
                 _logger.LogInformation("Counting ModelAi entities...");
                 return _share.CountAsync();
             }

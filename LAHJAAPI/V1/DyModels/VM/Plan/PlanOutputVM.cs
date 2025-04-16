@@ -30,8 +30,8 @@ namespace V1.DyModels.VMs
         public DateTime UpdatedAt { get; set; }
         ///
         public DateTime CreatedAt { get; set; }
-        ////
-        //public List<SubscriptionOutputVM>? Subscriptions { get; set; }
+        //
+        public List<SubscriptionOutputVM>? Subscriptions { get; set; }
         //
         public List<PlanFeatureOutputVM>? PlanFeatures { get; set; }
     }

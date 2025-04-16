@@ -1,32 +1,37 @@
 using AutoGenerator;
-using AutoMapper;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
+using AutoGenerator.Helper;
 using AutoGenerator.Services.Base;
+using AutoMapper;
 using V1.DyModels.Dso.Requests;
 using V1.DyModels.Dso.Responses;
-using LAHJAAPI.Models;
 using V1.DyModels.Dto.Share.Requests;
-using V1.DyModels.Dto.Share.Responses;
 using V1.Repositories.Share;
-using System.Linq.Expressions;
-using V1.Repositories.Builder;
-using AutoGenerator.Repositories.Base;
-using AutoGenerator.Helper;
-using System;
-using LAHJAAPI.V1.Validators;
-using LAHJAAPI.V1.Validators.Conditions;
 
 namespace V1.Services.Services
 {
     public class SpaceService : BaseService<SpaceRequestDso, SpaceResponseDso>, IUseSpaceService
     {
-        private readonly IConditionChecker _checker;
         private readonly ISpaceShareRepository _share;
-        public SpaceService(ISpaceShareRepository buildSpaceShareRepository, IMapper mapper, ILoggerFactory logger, IConditionChecker checker) : base(mapper, logger)
+        public SpaceService(ISpaceShareRepository buildSpaceShareRepository, IMapper mapper, ILoggerFactory logger) : base(mapper, logger)
         {
             _share = buildSpaceShareRepository;
-            _checker = checker; 
+        }
+
+
+        public async Task<IEnumerable<SpaceResponseDso>> GetSpacesBySubscriptionId(string subscriptionId)
+        {
+            try
+            {
+                _logger.LogInformation($"Retrieving spaces by subscription.");
+                var pagedResponse = await _share.GetAllByAsync([new FilterCondition { PropertyName = "SubscriptionId", Value = subscriptionId }]);
+
+                return GetMapper().Map<IEnumerable<SpaceResponseDso>>(pagedResponse.Data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieve spaces by subscription.");
+                throw;
+            }
         }
 
         public override Task<int> CountAsync()
@@ -48,20 +53,10 @@ namespace V1.Services.Services
             try
             {
                 _logger.LogInformation("Creating new Space entity...");
-                var check = _checker.Check(SpaceValidatorStates.IsFull, entity);
-                if (check)
-                {
-                    var result = await _share.CreateAsync(entity);
-                    var output = GetMapper().Map<SpaceResponseDso>(result);
-                    _logger.LogInformation("Created Space entity successfully.");
-                    return output;
-                }
-                else
-                {
-                    _logger.LogError( "Error while creating Space entity.");
-                    return null;
-                }
-              
+                var result = await _share.CreateAsync(entity);
+                var output = GetMapper().Map<SpaceResponseDso>(result);
+                _logger.LogInformation("Created Space entity successfully.");
+                return output;
             }
             catch (Exception ex)
             {
@@ -233,9 +228,6 @@ namespace V1.Services.Services
                 _logger.LogError(ex, "Error while deleting multiple Spaces.");
             }
         }
-
-
-
 
         public override async Task<PagedResponse<SpaceResponseDso>> GetAllByAsync(List<FilterCondition> conditions, ParamOptions? options = null)
         {

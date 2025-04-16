@@ -179,12 +179,10 @@ namespace V1.Repositories.Share
             }
         }
 
-
         public override async Task<PagedResponse<SpaceResponseShareDto>> GetAllAsync(string[]? includes = null, int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-
                 _logger.LogInformation("Fetching all Spaces with pagination: Page {PageNumber}, Size {PageSize}", pageNumber, pageSize);
                 var results = (await _builder.GetAllAsync(includes, pageNumber, pageSize));
                 var items = MapToIEnumerableShareResponseDto(results.Data);
@@ -192,7 +190,6 @@ namespace V1.Repositories.Share
             }
             catch (Exception ex)
             {
-
                 _logger.LogError(ex, "Error while fetching all Spaces.");
                 return new PagedResponse<SpaceResponseShareDto>(new List<SpaceResponseShareDto>(), pageNumber, pageSize, 0);
             }

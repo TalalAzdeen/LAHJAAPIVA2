@@ -54,7 +54,6 @@ namespace V1.Controllers.Api
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ServiceInfoVM>> GetById(string? id)
         {
-
             if (string.IsNullOrWhiteSpace(id))
             {
                 _logger.LogWarning("Invalid Service ID received.");

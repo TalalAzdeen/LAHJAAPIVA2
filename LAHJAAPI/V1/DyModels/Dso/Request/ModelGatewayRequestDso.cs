@@ -6,6 +6,5 @@ namespace V1.DyModels.Dso.Requests
 {
     public class ModelGatewayRequestDso : ModelGatewayRequestShareDto, ITDso
     {
-        public String? Token { get; set; }
     }
 }

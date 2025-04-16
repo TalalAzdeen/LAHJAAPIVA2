@@ -6,13 +6,11 @@ using System;
 namespace V1.DyModels.VMs
 {
     /// <summary>
-    /// Space  property for VM Update.
+    /// EventRequest  property for VM Info.
     /// </summary>
-    public class SpaceUpdateVM : ITVM
+    public class EventResponseInfoVM : ITVM
     {
         ///
         public string? Id { get; set; }
-        ///
-        public SpaceCreateVM? Body { get; set; }
     }
 }

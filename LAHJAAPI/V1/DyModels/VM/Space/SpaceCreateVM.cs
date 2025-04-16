@@ -1,7 +1,4 @@
 using AutoGenerator;
-using AutoGenerator.Helper.Translation;
-using LAHJAAPI.Models;
-using System;
 
 namespace V1.DyModels.VMs
 {
@@ -26,16 +23,6 @@ namespace V1.DyModels.VMs
         public Nullable<Boolean> IsGlobal { get; set; }
         ///
         public Nullable<Single> Bandwidth { get; set; }
-        ///
-      //lic String? Token { get; set; }
-        ///
-        public String? SubscriptionId { get; set; }
-        //
-        //public ICollection<RequestCreateVM>? Requests { get; set; }
-        ////
-        //public ICollection<RequestCreateVM>? Requests2 { get; set; }
-        ////
-        //public RequestCreateVM[]? Requests3 { get; set; }
+        public String? Token { get; set; }
     }
-
 }

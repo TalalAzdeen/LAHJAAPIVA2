@@ -11,9 +11,6 @@ namespace V1.DyModels.VMs
     public class CategoryModelCreateVM : ITVM
     {
         //
-
-
-
         public TranslationData? Name { get; set; }
         //
         public TranslationData? Description { get; set; }

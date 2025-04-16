@@ -38,18 +38,13 @@ namespace V1.Services.Services
                 return Task.FromResult(0);
             }
         }
-        private async Task<string> Gettoken()
-        {
-            return  $"token{Guid.NewGuid():N}";
-        }
+
         public override async Task<ModelGatewayResponseDso> CreateAsync(ModelGatewayRequestDso entity)
         {
             try
             {
                 _logger.LogInformation("Creating new ModelGateway entity...");
-                entity.Token =await  Gettoken();
                 var result = await _share.CreateAsync(entity);
-
                 var output = GetMapper().Map<ModelGatewayResponseDso>(result);
                 _logger.LogInformation("Created ModelGateway entity successfully.");
                 return output;

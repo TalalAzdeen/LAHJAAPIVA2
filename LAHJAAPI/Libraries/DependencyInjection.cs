@@ -7,8 +7,6 @@ public static class DependencyInjectionStripe
 {
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-
-
         services.AddScoped<IStripePrice, StripePrice>();
         services.AddScoped<IStripeProduct, StripeProduct>();
         services.AddScoped<IStripeCheckout, StripeCheckout>();

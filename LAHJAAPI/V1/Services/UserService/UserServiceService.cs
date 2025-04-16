@@ -17,7 +17,6 @@ using System;
 
 namespace V1.Services.Services
 {
-
     public class UserServiceService : BaseService<UserServiceRequestDso, UserServiceResponseDso>, IUseUserServiceService
     {
         private readonly IUserServiceShareRepository _share;

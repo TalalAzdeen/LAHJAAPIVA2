@@ -46,7 +46,6 @@ namespace V1.Services.Services
                 _logger.LogInformation("Creating new Plan entity...");
                 var result = await _share.CreateAsync(entity);
                 var output = GetMapper().Map<PlanResponseDso>(result);
-
                 _logger.LogInformation("Created Plan entity successfully.");
                 return output;
             }
